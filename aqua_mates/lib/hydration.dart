@@ -40,6 +40,9 @@ class _HydrationPageState extends State<HydrationPage> {
           userData = userDoc.data() as Map<String, dynamic>?;
         });
 
+        // Check if it's a new day and reset the cups count if needed
+        await _checkAndResetHydration();
+
         List<dynamic> friendsIds = userData?['friends'] ?? [];
 
         if (friendsIds.isNotEmpty) {
@@ -52,7 +55,6 @@ class _HydrationPageState extends State<HydrationPage> {
       }
     } catch (e) {
       print("Error fetching data: $e");
-      // Optionally, show an error message to the user
     } finally {
       setState(() {
         isLoading = false;
@@ -60,7 +62,34 @@ class _HydrationPageState extends State<HydrationPage> {
     }
   }
 
-  // Refresh data when returning to this page
+  // Check if it's a new day and reset the cups count if needed
+  Future<void> _checkAndResetHydration() async {
+    if (userData != null && userData!['hydration'] != null) {
+      var hydration = userData!['hydration'];
+      int cups = hydration['cups'] ?? 0;
+      int streak = hydration['streak'] ?? 0;
+      Timestamp lastHydration = hydration['lastHydration'] ?? Timestamp.now();
+      DateTime lastHydrationDate = lastHydration.toDate();
+
+      DateTime currentDate = DateTime.now();
+      String today = currentDate.toString().substring(0, 10);
+      String lastHydrationString = lastHydrationDate.toString().substring(0, 10);
+
+      // If it's a new day, reset the cups to 0
+      if (today != lastHydrationString) {
+        setState(() {
+          userData!['hydration']['cups'] = 0;
+        });
+
+        // Update Firestore to reset cups to 0 for the new day
+        await FirebaseFirestore.instance.collection('users').doc(widget.userId).update({
+          'hydration.cups': 0,
+          'hydration.lastHydration': Timestamp.now(),
+        });
+      }
+    }
+  }
+
   Future<void> _refreshData() async {
     setState(() {
       isLoading = true;
@@ -69,6 +98,61 @@ class _HydrationPageState extends State<HydrationPage> {
     });
     await fetchData();
   }
+
+  // Method to add a cup of water and update Firestore
+  Future<void> _addCup() async {
+  try {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(widget.userId);
+    final userDoc = await userRef.get();
+
+    if (userDoc.exists) {
+      var hydrationData = userDoc['hydration'];
+      int currentCups = hydrationData['cups'] ?? 0;
+      int currentStreak = hydrationData['streak'] ?? 0;
+      Timestamp lastHydration = hydrationData['lastHydration'];
+      Timestamp? lastStreakUpdate = hydrationData['lastStreakUpdate'];
+
+      DateTime now = DateTime.now();
+      DateTime today = DateTime(now.year, now.month, now.day);
+      DateTime lastStreakUpdateDate = lastStreakUpdate?.toDate() ?? DateTime(1970, 1, 1);
+      DateTime lastHydrationDate = lastHydration.toDate();
+
+      // Reset cups if last hydration was on a previous day
+      if (lastHydrationDate.isBefore(today)) {
+        currentCups = 0;
+      }
+
+      currentCups += 1;
+
+      // Prepare data to update in Firestore
+      Map<String, dynamic> updatedData = {
+        'hydration.cups': currentCups,
+        'hydration.lastHydration': Timestamp.now(),
+      };
+
+      // If the user drinks 8 or more cups and the streak was not updated today, increase streak
+      if (currentCups >= 8 && lastStreakUpdateDate.isBefore(today)) {
+        currentStreak += 1;
+        updatedData['hydration.streak'] = currentStreak;
+        updatedData['hydration.lastStreakUpdate'] = Timestamp.now();
+      }
+
+      // Update Firestore with the new data
+      await userRef.update(updatedData);
+
+      // Update local state
+      setState(() {
+        userData!['hydration']['cups'] = currentCups;
+        if (updatedData.containsKey('hydration.streak')) {
+          userData!['hydration']['streak'] = currentStreak;
+        }
+      });
+    }
+  } catch (e) {
+    print('Error updating hydration data: $e');
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +191,6 @@ class _HydrationPageState extends State<HydrationPage> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Navigate to AddFriendPage and refresh data after returning
           await Navigator.push(
             context,
             MaterialPageRoute(
@@ -132,8 +215,6 @@ class _HydrationPageState extends State<HydrationPage> {
     Timestamp lastHydration = hydration['lastHydration'];
     DateTime lastHydrationDate = lastHydration.toDate();
 
-    // Optionally, add logic to update streak based on lastHydrationDate
-
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -155,6 +236,11 @@ class _HydrationPageState extends State<HydrationPage> {
             Text("Current Streak: $streak days",
                 style: GoogleFonts.raleway(
                     textStyle: const TextStyle(fontSize: 16))),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _addCup,
+              child: const Text("Add a Cup"),
+            ),
           ],
         ),
       ),

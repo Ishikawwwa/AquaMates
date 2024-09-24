@@ -47,7 +47,7 @@ class Login extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  'Hello Again',
+                  'Welcome Back!',
                   style: GoogleFonts.raleway(
                     textStyle: const TextStyle(
                       color: Colors.black,

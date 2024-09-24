@@ -10,7 +10,7 @@ class Signup extends StatelessWidget {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _nicknameController = TextEditingController(); // Add nickname controller
+  final TextEditingController _nicknameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {

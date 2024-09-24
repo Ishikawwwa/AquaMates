@@ -16,7 +16,7 @@ class DatabaseService {
     }
   }
 
-  // Add friend by friend's UID
+  // Add friend by friend's User ID
   Future<void> addFriend(String userId, String friendId) async {
     if (userId == friendId) {
       throw Exception("You cannot add yourself as a friend.");

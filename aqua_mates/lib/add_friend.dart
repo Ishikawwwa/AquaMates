@@ -17,7 +17,6 @@ class _AddFriendPageState extends State<AddFriendPage> {
   final DatabaseService _dbService = DatabaseService();
   bool isLoading = false;
 
-  // Function to add friend
   Future<void> _addFriend() async {
     String friendEmail = _emailController.text.trim();
     String currentUserId = FirebaseAuth.instance.currentUser!.uid;
@@ -39,7 +38,6 @@ class _AddFriendPageState extends State<AddFriendPage> {
     });
 
     try {
-      // Fetch friend user document by email
       var friendDoc = await _dbService.getUserByEmail(friendEmail);
 
       if (friendDoc == null) {
@@ -56,7 +54,6 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
       String friendId = friendDoc.id;
 
-      // Prevent adding oneself
       if (friendId == currentUserId) {
         Fluttertoast.showToast(
           msg: "You cannot add yourself as a friend.",
@@ -85,7 +82,6 @@ class _AddFriendPageState extends State<AddFriendPage> {
         return;
       }
 
-      // Add friend
       await _dbService.addFriend(currentUserId, friendId);
 
       Fluttertoast.showToast(
@@ -97,10 +93,8 @@ class _AddFriendPageState extends State<AddFriendPage> {
         fontSize: 14.0,
       );
 
-      // Clear the text field
       _emailController.clear();
 
-      // Optionally, navigate back or refresh
       Navigator.pop(context);
     } catch (e) {
       print("Error adding friend: $e");
