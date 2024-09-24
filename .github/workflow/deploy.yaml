@@ -25,7 +25,8 @@ jobs:
         run: flutter build web --target=aqua_mates/lib/main.dart
 
       - name: Deploy to GitHub Pages
-        uses: bluefireteam/flutter-gh-pages@v7
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          baseHref: /app/
-          customArgs: --target="aqua_mates/lib/main.dart"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/web
+          keep_files: true
