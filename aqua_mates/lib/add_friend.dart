@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'LocaleProvider.dart';
 import 'services/database_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddFriendPage extends StatefulWidget {
   const AddFriendPage({super.key});
@@ -23,7 +25,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
     if (friendEmail.isEmpty) {
       Fluttertoast.showToast(
-        msg: "Please enter an email address.",
+        msg: AppLocalizations.of(context)!.pleaseEnterAnEmailAddress,
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.SNACKBAR,
         backgroundColor: Colors.black54,
@@ -56,7 +58,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
       if (friendId == currentUserId) {
         Fluttertoast.showToast(
-          msg: "You cannot add yourself as a friend.",
+          msg: AppLocalizations.of(context)!.noUserFoundWithThatEmail,
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.SNACKBAR,
           backgroundColor: Colors.redAccent,
@@ -72,7 +74,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
       if (currentFriends.contains(friendId)) {
         Fluttertoast.showToast(
-          msg: "You are already friends with this user.",
+          msg: AppLocalizations.of(context)!.youAreAlreadyFriendsWithThisUser,
           toastLength: Toast.LENGTH_LONG,
           gravity: ToastGravity.SNACKBAR,
           backgroundColor: Colors.orangeAccent,
@@ -85,7 +87,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
       await _dbService.addFriend(currentUserId, friendId);
 
       Fluttertoast.showToast(
-        msg: "Friend added successfully!",
+        msg: AppLocalizations.of(context)!.friendAddedSuccessfully,
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.SNACKBAR,
         backgroundColor: Colors.green,
@@ -99,7 +101,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
     } catch (e) {
       print("Error adding friend: $e");
       Fluttertoast.showToast(
-        msg: "An error occurred while adding friend.",
+        msg: AppLocalizations.of(context)!.anErrorOccurredWhileAddingFriend,
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.SNACKBAR,
         backgroundColor: Colors.redAccent,
@@ -115,16 +117,17 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Friend"),
+        title: Text(AppLocalizations.of(context)!.addFriend),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(
-              "Add a Friend by Email",
+              AppLocalizations.of(context)!.addAFriendByEmail,
               style: GoogleFonts.raleway(
                 textStyle: const TextStyle(
                   fontSize: 22,
@@ -136,7 +139,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
-                hintText: "Enter friend's email",
+                hintText: AppLocalizations.of(context)!.enterFriendsEmail,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -157,7 +160,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
                       elevation: 0,
                     ),
                     onPressed: _addFriend,
-                    child: const Text("Add Friend"),
+                    child: Text(AppLocalizations.of(context)!.addFriend),
                   ),
           ],
         ),

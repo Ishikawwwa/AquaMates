@@ -1,9 +1,11 @@
+import 'LocaleProvider.dart';
 import 'login.dart';
 import 'services/auth_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Signup extends StatelessWidget {
   Signup({super.key});
@@ -14,6 +16,8 @@ class Signup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = LocaleProvider.of(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
@@ -22,6 +26,14 @@ class Signup extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 50,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              _changeLanguage(context, localeProvider);
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -30,7 +42,7 @@ class Signup extends StatelessWidget {
             children: [
               Center(
                 child: Text(
-                  'Register Account',
+                  AppLocalizations.of(context)!.registerAccount,
                   style: GoogleFonts.raleway(
                     textStyle: const TextStyle(
                       color: Colors.black,
@@ -41,11 +53,11 @@ class Signup extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              _nicknameField(),
+              _nicknameField(context),
               const SizedBox(height: 20),
-              _emailAddress(),
+              _emailAddress(context),
               const SizedBox(height: 20),
-              _password(),
+              _password(context),
               const SizedBox(height: 50),
               _signup(context),
             ],
@@ -55,12 +67,20 @@ class Signup extends StatelessWidget {
     );
   }
 
-  Widget _nicknameField() {
+  void _changeLanguage(BuildContext context, LocaleProvider? localeProvider) {
+    // Toggle between English and Russian
+    Locale newLocale = (localeProvider!.locale.languageCode == 'en')
+        ? const Locale('ru')
+        : const Locale('en');
+    localeProvider.setLocale(newLocale);
+  }
+
+  Widget _nicknameField(context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Nickname',
+          AppLocalizations.of(context)!.nickname,
           style: GoogleFonts.raleway(
             textStyle: const TextStyle(
               color: Colors.black,
@@ -74,7 +94,7 @@ class Signup extends StatelessWidget {
           controller: _nicknameController,
           decoration: InputDecoration(
             filled: true,
-            hintText: 'Enter your nickname',
+            hintText: AppLocalizations.of(context)!.enterYourNickname,
             hintStyle: const TextStyle(
               color: Color(0xff6A6A6A),
               fontWeight: FontWeight.normal,
@@ -91,12 +111,12 @@ class Signup extends StatelessWidget {
     );
   }
 
-  Widget _emailAddress() {
+  Widget _emailAddress(context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Email Address',
+          AppLocalizations.of(context)!.emailAddress,
           style: GoogleFonts.raleway(
             textStyle: const TextStyle(
               color: Colors.black,
@@ -127,12 +147,12 @@ class Signup extends StatelessWidget {
     );
   }
 
-  Widget _password() {
+  Widget _password(context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Password',
+          AppLocalizations.of(context)!.password,
           style: GoogleFonts.raleway(
             textStyle: const TextStyle(
               color: Colors.black,
@@ -175,7 +195,7 @@ class Signup extends StatelessWidget {
 
         if (nickname.isEmpty || email.isEmpty || password.isEmpty) {
           Fluttertoast.showToast(
-            msg: "Please fill in all fields.",
+            msg: AppLocalizations.of(context)!.pleaseFillInAllFields,
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.SNACKBAR,
             backgroundColor: Colors.black54,
@@ -192,7 +212,7 @@ class Signup extends StatelessWidget {
           context: context,
         );
       },
-      child: const Text("Sign Up"),
+      child: Text(AppLocalizations.of(context)!.signUp),
     );
   }
 
@@ -203,8 +223,8 @@ class Signup extends StatelessWidget {
         textAlign: TextAlign.center,
         text: TextSpan(
           children: [
-            const TextSpan(
-              text: "Already Have Account? ",
+            TextSpan(
+              text: AppLocalizations.of(context)!.alreadyHaveAccount,
               style: TextStyle(
                 color: Color(0xff6A6A6A),
                 fontWeight: FontWeight.normal,
@@ -212,7 +232,7 @@ class Signup extends StatelessWidget {
               ),
             ),
             TextSpan(
-              text: "Log In",
+              text: AppLocalizations.of(context)!.logIn,
               style: const TextStyle(
                 color: Color(0xff1A1D1E),
                 fontWeight: FontWeight.normal,

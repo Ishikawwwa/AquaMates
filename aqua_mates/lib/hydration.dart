@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'LocaleProvider.dart';
 import 'services/database_service.dart';
 import 'services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'add_friend.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HydrationPage extends StatefulWidget {
   final String userId;
@@ -156,9 +158,11 @@ class _HydrationPageState extends State<HydrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = LocaleProvider.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Hydration Progress"),
+        title: Text(AppLocalizations.of(context)!.hydrationProgress),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -168,6 +172,12 @@ class _HydrationPageState extends State<HydrationPage> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await AuthService().signout(context: context);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              _changeLanguage(context, localeProvider);
             },
           ),
         ],
@@ -204,9 +214,17 @@ class _HydrationPageState extends State<HydrationPage> {
     );
   }
 
+  void _changeLanguage(BuildContext context, LocaleProvider? localeProvider) {
+    // Toggle between English and Russian
+    Locale newLocale = (localeProvider!.locale.languageCode == 'en')
+        ? const Locale('ru')
+        : const Locale('en');
+    localeProvider.setLocale(newLocale);
+  }
+
   Widget _buildUserHydrationSection() {
     if (userData == null) {
-      return const Text("No user data available.");
+      return Text(AppLocalizations.of(context)!.noUserDataAvailable);
     }
 
     var hydration = userData!['hydration'];
@@ -223,23 +241,23 @@ class _HydrationPageState extends State<HydrationPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Your Hydration Progress",
+            Text(AppLocalizations.of(context)!.yourHydrationProgress,
                 style: GoogleFonts.raleway(
                     textStyle: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ))),
             const SizedBox(height: 10),
-            Text("Today's Cups: $cups",
+            Text("${AppLocalizations.of(context)!.todaysCups}: $cups",
                 style: GoogleFonts.raleway(
                     textStyle: const TextStyle(fontSize: 16))),
-            Text("Current Streak: $streak days",
+            Text("${AppLocalizations.of(context)!.currentStreak}: $streak ${AppLocalizations.of(context)!.days}",
                 style: GoogleFonts.raleway(
                     textStyle: const TextStyle(fontSize: 16))),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _addCup,
-              child: const Text("Add a Cup"),
+              child: Text(AppLocalizations.of(context)!.addACup),
             ),
           ],
         ),
@@ -251,7 +269,7 @@ class _HydrationPageState extends State<HydrationPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Friends' Hydration Progress",
+        Text(AppLocalizations.of(context)!.friendsHydrationProgress,
             style: GoogleFonts.raleway(
                 textStyle: const TextStyle(
               fontSize: 20,
@@ -259,7 +277,7 @@ class _HydrationPageState extends State<HydrationPage> {
             ))),
         const SizedBox(height: 10),
         friendsData.isEmpty
-            ? const Text("No friends added yet.")
+            ? Text(AppLocalizations.of(context)!.noFriendsAddedYet)
             : ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -277,7 +295,7 @@ class _HydrationPageState extends State<HydrationPage> {
                         borderRadius: BorderRadius.circular(10)),
                     child: ListTile(
                       title: Text(nickname),
-                      subtitle: Text("Today's Cups: $cups\nStreak: $streak days"),
+                      subtitle: Text("${AppLocalizations.of(context)!.todaysCups}: $cups\n${AppLocalizations.of(context)!.currentStreak}: $streak ${AppLocalizations.of(context)!.days}"),
                       isThreeLine: true,
                     ),
                   );
