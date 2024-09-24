@@ -1,4 +1,4 @@
-import 'LocaleProvider.dart';
+import 'locale_provider.dart';
 import 'login.dart';
 import 'services/auth_service.dart';
 import 'package:flutter/gestures.dart';
@@ -225,7 +225,7 @@ class Signup extends StatelessWidget {
           children: [
             TextSpan(
               text: AppLocalizations.of(context)!.alreadyHaveAccount,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xff6A6A6A),
                 fontWeight: FontWeight.normal,
                 fontSize: 16,

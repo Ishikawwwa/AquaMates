@@ -1,5 +1,4 @@
-import 'LocaleProvider.dart';
-import 'main.dart';
+import 'locale_provider.dart';
 import 'signup.dart';
 import 'services/auth_service.dart';
 import 'package:flutter/gestures.dart';

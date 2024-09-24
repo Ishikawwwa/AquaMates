@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'LocaleProvider.dart';
+import 'locale_provider.dart';
 import 'services/database_service.dart';
 import 'services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -231,7 +231,6 @@ class _HydrationPageState extends State<HydrationPage> {
     int cups = hydration['cups'];
     int streak = hydration['streak'];
     Timestamp lastHydration = hydration['lastHydration'];
-    DateTime lastHydrationDate = lastHydration.toDate();
 
     return Card(
       elevation: 4,
