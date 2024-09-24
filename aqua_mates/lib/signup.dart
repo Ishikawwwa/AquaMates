@@ -3,12 +3,14 @@ import 'services/auth_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Signup extends StatelessWidget {
   Signup({super.key});
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nicknameController = TextEditingController(); // Add nickname controller
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class Signup extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-         padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Column(
             children: [
               Center(
@@ -33,28 +35,64 @@ class Signup extends StatelessWidget {
                     textStyle: const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
-                      fontSize: 32
-                    )
+                      fontSize: 32,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 80,),
-               _emailAddress(),
-               const SizedBox(height: 20,),
-               _password(),
-               const SizedBox(height: 50,),
-               _signup(context),
+              const SizedBox(height: 20),
+              _nicknameField(),
+              const SizedBox(height: 20),
+              _emailAddress(),
+              const SizedBox(height: 20),
+              _password(),
+              const SizedBox(height: 50),
+              _signup(context),
             ],
           ),
-
+        ),
       ),
-      )
+    );
+  }
+
+  Widget _nicknameField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nickname',
+          style: GoogleFonts.raleway(
+            textStyle: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.normal,
+              fontSize: 16,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _nicknameController,
+          decoration: InputDecoration(
+            filled: true,
+            hintText: 'Enter your nickname',
+            hintStyle: const TextStyle(
+              color: Color(0xff6A6A6A),
+              fontWeight: FontWeight.normal,
+              fontSize: 14,
+            ),
+            fillColor: const Color(0xffF7F7F9),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _emailAddress() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -63,11 +101,11 @@ class Signup extends StatelessWidget {
             textStyle: const TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.normal,
-              fontSize: 16
-            )
+              fontSize: 16,
+            ),
           ),
         ),
-        const SizedBox(height: 16,),
+        const SizedBox(height: 16),
         TextField(
           controller: _emailController,
           decoration: InputDecoration(
@@ -76,22 +114,21 @@ class Signup extends StatelessWidget {
             hintStyle: const TextStyle(
               color: Color(0xff6A6A6A),
               fontWeight: FontWeight.normal,
-              fontSize: 14
+              fontSize: 14,
             ),
-            fillColor: const Color(0xffF7F7F9) ,
+            fillColor: const Color(0xffF7F7F9),
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14)
-            )
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
-        )
+        ),
       ],
     );
   }
 
   Widget _password() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -100,23 +137,23 @@ class Signup extends StatelessWidget {
             textStyle: const TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.normal,
-              fontSize: 16
-            )
+              fontSize: 16,
+            ),
           ),
         ),
-        const SizedBox(height: 16,),
+        const SizedBox(height: 16),
         TextField(
-          controller: _passwordController,
           obscureText: true,
+          controller: _passwordController,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xffF7F7F9) ,
+            fillColor: const Color(0xffF7F7F9),
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14)
-            )
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -125,17 +162,34 @@ class Signup extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xff0D6EFD),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          minimumSize: const Size(double.infinity, 60),
-          elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        minimumSize: const Size(double.infinity, 60),
+        elevation: 0,
       ),
       onPressed: () async {
-       await AuthService().signup(
-          email: _emailController.text,
-          password: _passwordController.text,
-          context: context
+        String nickname = _nicknameController.text.trim();
+        String email = _emailController.text.trim();
+        String password = _passwordController.text.trim();
+
+        if (nickname.isEmpty || email.isEmpty || password.isEmpty) {
+          Fluttertoast.showToast(
+            msg: "Please fill in all fields.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.SNACKBAR,
+            backgroundColor: Colors.black54,
+            textColor: Colors.white,
+            fontSize: 14.0,
+          );
+          return;
+        }
+
+        await AuthService().signup(
+          email: email,
+          password: password,
+          nickname: nickname,
+          context: context,
         );
       },
       child: const Text("Sign Up"),
@@ -150,31 +204,32 @@ class Signup extends StatelessWidget {
         text: TextSpan(
           children: [
             const TextSpan(
-                text: "Already Have Account? ",
-                style: TextStyle(
-                  color: Color(0xff6A6A6A),
-                  fontWeight: FontWeight.normal,
-                  fontSize: 16
-                ),
+              text: "Already Have Account? ",
+              style: TextStyle(
+                color: Color(0xff6A6A6A),
+                fontWeight: FontWeight.normal,
+                fontSize: 16,
               ),
-              TextSpan(
-                text: "Log In",
-                style: const TextStyle(
-                    color: Color(0xff1A1D1E),
-                    fontWeight: FontWeight.normal,
-                    fontSize: 16
-                  ),
-                  recognizer: TapGestureRecognizer()..onTap = () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Login()
-                      ),
-                    );
-                  }
+            ),
+            TextSpan(
+              text: "Log In",
+              style: const TextStyle(
+                color: Color(0xff1A1D1E),
+                fontWeight: FontWeight.normal,
+                fontSize: 16,
               ),
-          ]
-        )
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Login(),
+                    ),
+                  );
+                },
+            ),
+          ],
+        ),
       ),
     );
   }

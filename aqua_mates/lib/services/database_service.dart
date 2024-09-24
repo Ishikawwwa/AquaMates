@@ -6,7 +6,7 @@ class DatabaseService {
   Future<DocumentSnapshot?> getUserByEmail(String email) async {
     QuerySnapshot snapshot = await _firestore
         .collection('users')
-        .where('user_mail', isEqualTo: email)
+        .where('email', isEqualTo: email)
         .get();
 
     if (snapshot.docs.isNotEmpty) {
@@ -16,8 +16,8 @@ class DatabaseService {
     }
   }
 
+  // Add friend by friend's UID
   Future<void> addFriend(String userId, String friendId) async {
-    // Prevent adding oneself
     if (userId == friendId) {
       throw Exception("You cannot add yourself as a friend.");
     }
