@@ -159,9 +159,6 @@ class _HydrationPageState extends State<HydrationPage> {
 
   @override
   Widget build(BuildContext context) {
-    var hydration = userData!['hydration'];
-    int streak = hydration['streak'];
-
     final localeProvider = LocaleProvider.of(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
 
@@ -173,9 +170,12 @@ class _HydrationPageState extends State<HydrationPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(Icons.local_fire_department, color: Colors.red),
-            const SizedBox(width: 8), 
+            const SizedBox(width: 8),
+            // Ensure streak is only accessed when userData is not null
             Text(
-              "$streak",
+              userData != null && userData!['hydration'] != null
+                  ? "${userData!['hydration']['streak']}"
+                  : "0",
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontSize: 20,
@@ -212,20 +212,20 @@ class _HydrationPageState extends State<HydrationPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: _refreshData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildUserHydrationSection(),
-                    const SizedBox(height: 20),
-                    _buildFriendsHydrationSection(),
-                  ],
-                ),
-              ),
-            ),
+        onRefresh: _refreshData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildUserHydrationSection(),
+              const SizedBox(height: 20),
+              _buildFriendsHydrationSection(),
+            ],
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         foregroundColor: Colors.blue,
         backgroundColor: Colors.white,
@@ -256,10 +256,15 @@ class _HydrationPageState extends State<HydrationPage> {
       return Text(AppLocalizations.of(context)!.noUserDataAvailable);
     }
 
+    // Check if 'hydration' data exists in userData before accessing it
     var hydration = userData!['hydration'];
-    int cups = hydration['cups'];
-    int streak = hydration['streak'];
-    Timestamp lastHydration = hydration['lastHydration'];
+    if (hydration == null) {
+      return Text(AppLocalizations.of(context)!.noUserDataAvailable); // Add a message for no hydration data
+    }
+
+    int cups = hydration['cups'] ?? 0; // Provide default values to avoid null errors
+    int streak = hydration['streak'] ?? 0;
+    Timestamp lastHydration = hydration['lastHydration'] ?? Timestamp.now();
 
     return Card(
       elevation: 4,
@@ -274,13 +279,14 @@ class _HydrationPageState extends State<HydrationPage> {
               children: [
                 const Icon(Icons.local_drink, color: Colors.blue),
                 const SizedBox(width: 10),
-                Text("$cups / 8",
+                Text(
+                  "$cups / 8",
                   style: GoogleFonts.raleway(
                     textStyle: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
-                  )
+                  ),
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
@@ -290,13 +296,14 @@ class _HydrationPageState extends State<HydrationPage> {
                     backgroundColor: const Color(0xff0D6EFD),
                     shadowColor: Theme.of(context).shadowColor,
                   ),
-                  child: Text(AppLocalizations.of(context)!.addACup,
+                  child: Text(
+                    AppLocalizations.of(context)!.addACup,
                     style: const TextStyle(
                       color: Colors.white,
                     ),
                   ),
                 ),
-              ]
+              ],
             ),
             const SizedBox(height: 10),
             AnimatedProgressBar(
@@ -310,6 +317,7 @@ class _HydrationPageState extends State<HydrationPage> {
       ),
     );
   }
+
 
   Widget _buildFriendsHydrationSection() {
     return Column(
