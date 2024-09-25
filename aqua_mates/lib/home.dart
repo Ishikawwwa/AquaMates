@@ -11,7 +11,14 @@ class Home extends StatelessWidget {
     final User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        body: Center(child: Text(AppLocalizations.of(context)!.noUserLoggedIn)),
+        body: Center(
+          child: Text(
+            AppLocalizations.of(context)!.noUserLoggedIn,
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+        ),
       );
     }
 

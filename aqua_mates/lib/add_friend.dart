@@ -1,11 +1,13 @@
 import 'package:aqua_mates/locale_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'services/database_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:aqua_mates/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'theme_provider.dart'; // Import the ThemeProvider
 
 class AddFriendPage extends StatefulWidget {
   const AddFriendPage({super.key});
@@ -126,11 +128,13 @@ class _AddFriendPageState extends State<AddFriendPage> {
   @override
   Widget build(BuildContext context) {
     final localeProvider = LocaleProvider.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 100,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: Text(AppLocalizations.of(context)!.addFriend),
         actions: [
           IconButton(
@@ -138,6 +142,13 @@ class _AddFriendPageState extends State<AddFriendPage> {
             icon: const Icon(Icons.language),
             onPressed: () {
               _changeLanguage(context, localeProvider);
+            },
+          ),
+          IconButton(
+            padding: const EdgeInsets.all(16),
+            icon: const Icon(Icons.brightness_6),
+            onPressed: () {
+              themeProvider.toggleTheme();
             },
           ),
         ],
@@ -157,16 +168,16 @@ class _AddFriendPageState extends State<AddFriendPage> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _emailController,
+                            controller: _emailController,
               decoration: InputDecoration(
                 filled: true,
                 hintText: AppLocalizations.of(context)!.enterFriendsEmail,
-                hintStyle: const TextStyle(
-                  color: Color(0xff6A6A6A),
+                hintStyle: TextStyle(
+                  color: Theme.of(context).inputDecorationTheme.hintStyle?.color,
                   fontWeight: FontWeight.normal,
                   fontSize: 14,
                 ),
-                fillColor: const Color(0xffF7F7F9),
+                fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.circular(14),
@@ -191,8 +202,8 @@ class _AddFriendPageState extends State<AddFriendPage> {
                       AppLocalizations.of(context)!.addFriend,
                       style: const TextStyle(
                         fontSize: 16,
-                        color: Colors.white
-                      )
+                        color: Colors.white,
+                      ),
                     ),
                   ),
           ],

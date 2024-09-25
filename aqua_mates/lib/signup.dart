@@ -1,11 +1,13 @@
-import 'locale_provider.dart';
-import 'login.dart';
-import 'services/auth_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../theme_provider.dart'; // Import the ThemeProvider
+import '../locale_provider.dart';
+import '../services/auth_service.dart';
+import 'login.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Signup extends StatelessWidget {
   Signup({super.key});
@@ -17,20 +19,28 @@ class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeProvider = LocaleProvider.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       resizeToAvoidBottomInset: true,
       bottomNavigationBar: _signin(context),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        toolbarHeight: 50,
+        toolbarHeight: 100,
         actions: [
           IconButton(
             icon: const Icon(Icons.language),
             onPressed: () {
               _changeLanguage(context, localeProvider);
+            },
+          ),
+          IconButton(
+            padding: const EdgeInsets.all(16),
+            icon: const Icon(Icons.brightness_6),
+            onPressed: () {
+              themeProvider.toggleTheme();
             },
           ),
         ],
@@ -44,8 +54,8 @@ class Signup extends StatelessWidget {
                 child: Text(
                   AppLocalizations.of(context)!.registerAccount,
                   style: GoogleFonts.raleway(
-                    textStyle: const TextStyle(
-                      color: Colors.black,
+                    textStyle: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontWeight: FontWeight.bold,
                       fontSize: 32,
                     ),
@@ -75,15 +85,15 @@ class Signup extends StatelessWidget {
     localeProvider.setLocale(newLocale);
   }
 
-  Widget _nicknameField(context) {
+  Widget _nicknameField(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context)!.nickname,
           style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
+            textStyle: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               fontWeight: FontWeight.normal,
               fontSize: 16,
             ),
@@ -95,12 +105,12 @@ class Signup extends StatelessWidget {
           decoration: InputDecoration(
             filled: true,
             hintText: AppLocalizations.of(context)!.enterYourNickname,
-            hintStyle: const TextStyle(
-              color: Color(0xff6A6A6A),
+            hintStyle: TextStyle(
+              color: Theme.of(context).inputDecorationTheme.hintStyle?.color,
               fontWeight: FontWeight.normal,
               fontSize: 14,
             ),
-            fillColor: const Color(0xffF7F7F9),
+            fillColor: Theme.of(context).inputDecorationTheme.fillColor,
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(14),
@@ -111,15 +121,15 @@ class Signup extends StatelessWidget {
     );
   }
 
-  Widget _emailAddress(context) {
+  Widget _emailAddress(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context)!.emailAddress,
           style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
+            textStyle: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               fontWeight: FontWeight.normal,
               fontSize: 16,
             ),
@@ -131,12 +141,12 @@ class Signup extends StatelessWidget {
           decoration: InputDecoration(
             filled: true,
             hintText: 'ivanivanov@innopolis.university',
-            hintStyle: const TextStyle(
-              color: Color(0xff6A6A6A),
+            hintStyle: TextStyle(
+              color: Theme.of(context).inputDecorationTheme.hintStyle?.color,
               fontWeight: FontWeight.normal,
               fontSize: 14,
             ),
-            fillColor: const Color(0xffF7F7F9),
+            fillColor: Theme.of(context).inputDecorationTheme.fillColor,
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(14),
@@ -148,15 +158,15 @@ class Signup extends StatelessWidget {
     );
   }
 
-  Widget _password(context) {
+  Widget _password(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context)!.password,
           style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
+            textStyle: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               fontWeight: FontWeight.normal,
               fontSize: 16,
             ),
@@ -168,7 +178,7 @@ class Signup extends StatelessWidget {
           controller: _passwordController,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xffF7F7F9),
+            fillColor: Theme.of(context).inputDecorationTheme.fillColor,
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(14),
@@ -217,8 +227,8 @@ class Signup extends StatelessWidget {
         AppLocalizations.of(context)!.signUp,
         style: const TextStyle(
           fontSize: 16,
-          color: Colors.white
-        )
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -232,16 +242,16 @@ class Signup extends StatelessWidget {
           children: [
             TextSpan(
               text: AppLocalizations.of(context)!.alreadyHaveAccount,
-              style: const TextStyle(
-                color: Color(0xff6A6A6A),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.normal,
                 fontSize: 16,
               ),
             ),
             TextSpan(
               text: AppLocalizations.of(context)!.logIn,
-              style: const TextStyle(
-                color: Color(0xff1A1D1E),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.normal,
                 fontSize: 16,
               ),

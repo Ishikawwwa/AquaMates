@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'locale_provider.dart';
-import 'services/database_service.dart';
-import 'services/auth_service.dart';
+import '../locale_provider.dart';
+import '../services/database_service.dart';
+import '../services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'add_friend.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../theme_provider.dart'; // Import the ThemeProvider
 
 class HydrationPage extends StatefulWidget {
   final String userId;
@@ -103,58 +105,57 @@ class _HydrationPageState extends State<HydrationPage> {
 
   // Method to add a cup of water and update Firestore
   Future<void> _addCup() async {
-  try {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(widget.userId);
-    final userDoc = await userRef.get();
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(widget.userId);
+      final userDoc = await userRef.get();
 
-    if (userDoc.exists) {
-      var hydrationData = userDoc['hydration'];
-      int currentCups = hydrationData['cups'] ?? 0;
-      int currentStreak = hydrationData['streak'] ?? 0;
-      Timestamp lastHydration = hydrationData['lastHydration'];
-      Timestamp? lastStreakUpdate = hydrationData['lastStreakUpdate'];
+      if (userDoc.exists) {
+        var hydrationData = userDoc['hydration'];
+        int currentCups = hydrationData['cups'] ?? 0;
+        int currentStreak = hydrationData['streak'] ?? 0;
+        Timestamp lastHydration = hydrationData['lastHydration'];
+        Timestamp? lastStreakUpdate = hydrationData['lastStreakUpdate'];
 
-      DateTime now = DateTime.now();
-      DateTime today = DateTime(now.year, now.month, now.day);
-      DateTime lastStreakUpdateDate = lastStreakUpdate?.toDate() ?? DateTime(1970, 1, 1);
-      DateTime lastHydrationDate = lastHydration.toDate();
+        DateTime now = DateTime.now();
+        DateTime today = DateTime(now.year, now.month, now.day);
+        DateTime lastStreakUpdateDate = lastStreakUpdate?.toDate() ?? DateTime(1970, 1, 1);
+        DateTime lastHydrationDate = lastHydration.toDate();
 
-      // Reset cups if last hydration was on a previous day
-      if (lastHydrationDate.isBefore(today)) {
-        currentCups = 0;
-      }
-
-      currentCups += 1;
-
-      // Prepare data to update in Firestore
-      Map<String, dynamic> updatedData = {
-        'hydration.cups': currentCups,
-        'hydration.lastHydration': Timestamp.now(),
-      };
-
-      // If the user drinks 8 or more cups and the streak was not updated today, increase streak
-      if (currentCups >= 8 && lastStreakUpdateDate.isBefore(today)) {
-        currentStreak += 1;
-        updatedData['hydration.streak'] = currentStreak;
-        updatedData['hydration.lastStreakUpdate'] = Timestamp.now();
-      }
-
-      // Update Firestore with the new data
-      await userRef.update(updatedData);
-
-      // Update local state
-      setState(() {
-        userData!['hydration']['cups'] = currentCups;
-        if (updatedData.containsKey('hydration.streak')) {
-          userData!['hydration']['streak'] = currentStreak;
+        // Reset cups if last hydration was on a previous day
+        if (lastHydrationDate.isBefore(today)) {
+          currentCups = 0;
         }
-      });
-    }
-  } catch (e) {
-    print('Error updating hydration data: $e');
-  }
-}
 
+        currentCups += 1;
+
+        // Prepare data to update in Firestore
+        Map<String, dynamic> updatedData = {
+          'hydration.cups': currentCups,
+          'hydration.lastHydration': Timestamp.now(),
+        };
+
+        // If the user drinks 8 or more cups and the streak was not updated today, increase streak
+        if (currentCups >= 8 && lastStreakUpdateDate.isBefore(today)) {
+          currentStreak += 1;
+          updatedData['hydration.streak'] = currentStreak;
+          updatedData['hydration.lastStreakUpdate'] = Timestamp.now();
+        }
+
+        // Update Firestore with the new data
+        await userRef.update(updatedData);
+
+        // Update local state
+        setState(() {
+          userData!['hydration']['cups'] = currentCups;
+          if (updatedData.containsKey('hydration.streak')) {
+            userData!['hydration']['streak'] = currentStreak;
+          }
+        });
+      }
+    } catch (e) {
+      print('Error updating hydration data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -162,9 +163,10 @@ class _HydrationPageState extends State<HydrationPage> {
     int streak = hydration['streak'];
 
     final localeProvider = LocaleProvider.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Row(
@@ -174,19 +176,25 @@ class _HydrationPageState extends State<HydrationPage> {
             const SizedBox(width: 8), 
             Text(
               "$streak",
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontSize: 20,
               ),
             ),
           ],
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.language),
             onPressed: () {
               _changeLanguage(context, localeProvider);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.brightness_6),
+            onPressed: () {
+              themeProvider.toggleTheme();
             },
           ),
           IconButton(
@@ -255,7 +263,7 @@ class _HydrationPageState extends State<HydrationPage> {
 
     return Card(
       elevation: 4,
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -268,8 +276,10 @@ class _HydrationPageState extends State<HydrationPage> {
                 const SizedBox(width: 10),
                 Text("$cups / 8",
                   style: GoogleFonts.raleway(
-                    textStyle: const TextStyle(fontSize: 16),
-                    color: Colors.black,
+                    textStyle: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   )
                 ),
                 const SizedBox(width: 20),
@@ -277,9 +287,15 @@ class _HydrationPageState extends State<HydrationPage> {
                   iconAlignment: IconAlignment.start,
                   onPressed: _addCup,
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xff0D6EFD),
+                    shadowColor: Theme.of(context).shadowColor,
                   ),
-                  child: Text(AppLocalizations.of(context)!.addACup),
+                  child: Text(AppLocalizations.of(context)!.addACup,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ]
             ),
@@ -303,9 +319,10 @@ class _HydrationPageState extends State<HydrationPage> {
       children: [
         Text(AppLocalizations.of(context)!.friendsHydrationProgress,
             style: GoogleFonts.raleway(
-                textStyle: const TextStyle(
+                textStyle: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ))),
         const SizedBox(height: 10),
         friendsData.isEmpty
@@ -322,7 +339,7 @@ class _HydrationPageState extends State<HydrationPage> {
                   int streak = hydration['streak'];
 
                   return Card(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
@@ -340,8 +357,10 @@ class _HydrationPageState extends State<HydrationPage> {
                                     Text(
                                       nickname,
                                       style: GoogleFonts.raleway(
-                                        textStyle: const TextStyle(fontSize: 16),
-                                        color: Colors.black,
+                                        textStyle: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                                        ),
                                       )
                                     ),
                                   ],
@@ -357,8 +376,10 @@ class _HydrationPageState extends State<HydrationPage> {
                                     const SizedBox(width: 10),
                                     Text("$cups / 8",
                                       style: GoogleFonts.raleway(
-                                        textStyle: const TextStyle(fontSize: 16),
-                                        color: Colors.black,
+                                        textStyle: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                                        ),
                                       )
                                     ),
                                   ],
@@ -375,8 +396,10 @@ class _HydrationPageState extends State<HydrationPage> {
                                     Text(
                                       "$streak",
                                       style: GoogleFonts.raleway(
-                                        textStyle: const TextStyle(fontSize: 16),
-                                        color: Colors.black,
+                                        textStyle: TextStyle(
+                                          fontSize: 16,
+                                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                                        ),
                                       )
                                     ),
                                   ],
