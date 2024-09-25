@@ -142,6 +142,7 @@ class Signup extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
             ),
           ),
+          keyboardType: TextInputType.emailAddress,
         ),
       ],
     );
@@ -212,7 +213,13 @@ class Signup extends StatelessWidget {
           context: context,
         );
       },
-      child: Text(AppLocalizations.of(context)!.signUp),
+      child: Text(
+        AppLocalizations.of(context)!.signUp,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.white
+        )
+      ),
     );
   }
 

@@ -44,6 +44,7 @@ class Login extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            padding: const EdgeInsets.all(16),
             icon: const Icon(Icons.language),
             onPressed: () {
               _changeLanguage(context, localeProvider);
@@ -178,7 +179,13 @@ class Login extends StatelessWidget {
           context: context,
         );
       },
-      child: Text(AppLocalizations.of(context)!.signIn),
+      child: Text(
+        AppLocalizations.of(context)!.signIn,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.white
+        )
+      ),
     );
   }
 

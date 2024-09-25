@@ -1,3 +1,4 @@
+import 'package:aqua_mates/locale_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'services/database_service.dart';
@@ -114,12 +115,32 @@ class _AddFriendPageState extends State<AddFriendPage> {
     }
   }
 
+  void _changeLanguage(BuildContext context, LocaleProvider? localeProvider) {
+    // Toggle between English and Russian
+    Locale newLocale = (localeProvider!.locale.languageCode == 'en')
+        ? const Locale('ru')
+        : const Locale('en');
+    localeProvider.setLocale(newLocale);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final localeProvider = LocaleProvider.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: Text(AppLocalizations.of(context)!.addFriend),
+        actions: [
+          IconButton(
+            padding: const EdgeInsets.all(16),
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              _changeLanguage(context, localeProvider);
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -138,15 +159,22 @@ class _AddFriendPageState extends State<AddFriendPage> {
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
+                filled: true,
                 hintText: AppLocalizations.of(context)!.enterFriendsEmail,
+                hintStyle: const TextStyle(
+                  color: Color(0xff6A6A6A),
+                  fontWeight: FontWeight.normal,
+                  fontSize: 14,
+                ),
+                fillColor: const Color(0xffF7F7F9),
                 border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                prefixIcon: const Icon(Icons.email),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 50),
             isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
@@ -159,7 +187,13 @@ class _AddFriendPageState extends State<AddFriendPage> {
                       elevation: 0,
                     ),
                     onPressed: _addFriend,
-                    child: Text(AppLocalizations.of(context)!.addFriend),
+                    child: Text(
+                      AppLocalizations.of(context)!.addFriend,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white
+                      )
+                    ),
                   ),
           ],
         ),

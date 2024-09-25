@@ -158,12 +158,37 @@ class _HydrationPageState extends State<HydrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    var hydration = userData!['hydration'];
+    int streak = hydration['streak'];
+
     final localeProvider = LocaleProvider.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white, 
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.hydrationProgress),
+        centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.local_fire_department, color: Colors.red),
+            const SizedBox(width: 8), 
+            Text(
+              "$streak",
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              _changeLanguage(context, localeProvider);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshData,
@@ -172,12 +197,6 @@ class _HydrationPageState extends State<HydrationPage> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await AuthService().signout(context: context);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.language),
-            onPressed: () {
-              _changeLanguage(context, localeProvider);
             },
           ),
         ],
@@ -200,6 +219,8 @@ class _HydrationPageState extends State<HydrationPage> {
               ),
             ),
       floatingActionButton: FloatingActionButton(
+        foregroundColor: Colors.blue,
+        backgroundColor: Colors.white,
         onPressed: () async {
           await Navigator.push(
             context,
@@ -234,29 +255,41 @@ class _HydrationPageState extends State<HydrationPage> {
 
     return Card(
       elevation: 4,
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.yourHydrationProgress,
-                style: GoogleFonts.raleway(
-                    textStyle: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ))),
+            Row(
+              children: [
+                const Icon(Icons.local_drink, color: Colors.blue),
+                const SizedBox(width: 10),
+                Text("$cups / 8",
+                  style: GoogleFonts.raleway(
+                    textStyle: const TextStyle(fontSize: 16),
+                    color: Colors.black,
+                  )
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  iconAlignment: IconAlignment.start,
+                  onPressed: _addCup,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                  ),
+                  child: Text(AppLocalizations.of(context)!.addACup),
+                ),
+              ]
+            ),
             const SizedBox(height: 10),
-            Text("${AppLocalizations.of(context)!.todaysCups}: $cups",
-                style: GoogleFonts.raleway(
-                    textStyle: const TextStyle(fontSize: 16))),
-            Text("${AppLocalizations.of(context)!.currentStreak}: $streak ${AppLocalizations.of(context)!.days}",
-                style: GoogleFonts.raleway(
-                    textStyle: const TextStyle(fontSize: 16))),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _addCup,
-              child: Text(AppLocalizations.of(context)!.addACup),
+            LinearProgressIndicator(
+              minHeight: 30,
+              borderRadius: BorderRadius.circular(10),
+              value: cups * 0.125 + 0.01,
+              backgroundColor: Colors.grey[300],
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
           ],
         ),
@@ -289,14 +322,70 @@ class _HydrationPageState extends State<HydrationPage> {
                   int streak = hydration['streak'];
 
                   return Card(
+                    color: Colors.white,
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      title: Text(nickname),
-                      subtitle: Text("${AppLocalizations.of(context)!.todaysCups}: $cups\n${AppLocalizations.of(context)!.currentStreak}: $streak ${AppLocalizations.of(context)!.days}"),
-                      isThreeLine: true,
-                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: 
+                        Row(
+                          children: [
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.person, color: Colors.blue),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      nickname,
+                                      style: GoogleFonts.raleway(
+                                        textStyle: const TextStyle(fontSize: 16),
+                                        color: Colors.black,
+                                      )
+                                    ),
+                                  ],
+                                )
+                              ]
+                            ),
+                            const SizedBox(width: 40),
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.local_drink, color: Colors.blue),
+                                    const SizedBox(width: 10),
+                                    Text("$cups / 8",
+                                      style: GoogleFonts.raleway(
+                                        textStyle: const TextStyle(fontSize: 16),
+                                        color: Colors.black,
+                                      )
+                                    ),
+                                  ],
+                                )
+                              ]
+                            ),
+                            const SizedBox(width: 40),
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.local_fire_department, color: Colors.red),
+                                    const SizedBox(width: 8), 
+                                    Text(
+                                      "$streak",
+                                      style: GoogleFonts.raleway(
+                                        textStyle: const TextStyle(fontSize: 16),
+                                        color: Colors.black,
+                                      )
+                                    ),
+                                  ],
+                                )
+                              ]
+                            ),
+                          ],
+                        ),
+                    )
                   );
                 },
               ),
