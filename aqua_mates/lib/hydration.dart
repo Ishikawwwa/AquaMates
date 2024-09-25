@@ -284,7 +284,6 @@ class _HydrationPageState extends State<HydrationPage> {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  iconAlignment: IconAlignment.start,
                   onPressed: _addCup,
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -300,12 +299,11 @@ class _HydrationPageState extends State<HydrationPage> {
               ]
             ),
             const SizedBox(height: 10),
-            LinearProgressIndicator(
-              minHeight: 30,
-              borderRadius: BorderRadius.circular(10),
-              value: cups * 0.125 + 0.01,
-              backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+            AnimatedProgressBar(
+              value: cups < 8 ? cups * 0.125 + 0.01 : 1.0,
+              duration: const Duration(seconds: 1),
+              backgroundColor: Colors.grey[300]!,
+              valueColor: Colors.blue,
             ),
           ],
         ),
@@ -414,5 +412,120 @@ class _HydrationPageState extends State<HydrationPage> {
               ),
       ],
     );
+  }
+}
+
+class AnimatedProgressBar extends StatefulWidget {
+  final double value;
+  final Duration duration;
+  final Color backgroundColor;
+  final Color valueColor;
+
+  const AnimatedProgressBar({
+    Key? key,
+    required this.value,
+    required this.duration,
+    required this.backgroundColor,
+    required this.valueColor,
+  }) : super(key: key);
+
+  @override
+  _AnimatedProgressBarState createState() => _AnimatedProgressBarState();
+}
+
+class _AnimatedProgressBarState extends State<AnimatedProgressBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  double _currentValue = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: _currentValue, end: widget.value).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(AnimatedProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _currentValue = _animation.value; // Update current value to the current animation value
+      _controller.reset();
+      _animation = Tween<double>(begin: _currentValue, end: widget.value).animate(_controller);
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          size: Size(double.infinity, 30),
+          painter: AnimatedProgressBarPainter(
+            value: _animation.value,
+            backgroundColor: widget.backgroundColor,
+            valueColor: widget.valueColor,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AnimatedProgressBarPainter extends CustomPainter {
+  final double value;
+  final Color backgroundColor;
+  final Color valueColor;
+
+  AnimatedProgressBarPainter({
+    required this.value,
+    required this.backgroundColor,
+    required this.valueColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint backgroundPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.fill;
+
+    Paint valuePaint = Paint()
+      ..color = valueColor
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Radius.circular(10),
+      ),
+      backgroundPaint,
+    );
+
+    double progressWidth = size.width * value;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, progressWidth, size.height),
+        Radius.circular(10),
+      ),
+      valuePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
