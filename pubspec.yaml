@@ -23,6 +23,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  mockito: ^5.0.16
+  fake_cloud_firestore: ^3.0.3
 
 flutter:
   uses-material-design: true
