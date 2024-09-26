@@ -1,0 +1,34 @@
+name: aqua_mates
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.6.0-175.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.5.0
+  cloud_firestore: ^5.4.2
+  firebase_auth: ^5.3.0
+  fluttertoast: ^8.2.8
+  google_fonts: ^6.2.1
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
+  provider: ^6.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  mockito: ^5.0.16
+  fake_cloud_firestore: ^3.0.3
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - lib/l10n/
